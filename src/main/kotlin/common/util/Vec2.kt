@@ -5,7 +5,7 @@ import kotlin.math.abs
 /**
  * Class representing a point in 2 dimensions
  */
-data class Vec2i(val x: Int, val y: Int): Comparable<Vec2i> {
+data class Vec2i(val x: Int, val y: Int) : Comparable<Vec2i> {
 
     constructor(xy: List<Int>) : this(xy[0], xy[1])
 
@@ -46,6 +46,21 @@ val Vec2i.aboveNeighbour: Vec2i
 
 val Vec2i.belowNeighbour: Vec2i
     get() = this + Direction.Down
+
+fun Vec2i.pointsBetween(other: Vec2i): List<Vec2i> {
+    require(x == other.x || y == other.y)
+    return when {
+        x == other.x -> {
+            val range = if (y < other.y) y..other.y else y downTo other.y
+            range.map { nextY -> Vec2i(x, nextY) }
+        }
+
+        else -> {
+            val range = if (x < other.x) x..other.x else x downTo other.x
+            range.map { nextX -> Vec2i(nextX, y) }
+        }
+    }.filter { it != this && it != other }
+}
 
 fun Vec2i.nextInDirection(direction: Direction, steps: Int = 1): Vec2i =
     when (direction) {
