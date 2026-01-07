@@ -90,7 +90,7 @@ private fun createDoubleMoveStates(state: State, component: Component): List<Sta
 
     return possibilities
         .filter { (other, index) ->
-            canMoveToFloor(state, component, other, index)
+            canMoveToFloor(state, listOf(component, other), index)
         }
         .map { (other, index) ->
             State(
@@ -115,7 +115,7 @@ private fun createSingleMoveStates(
     .filter { it.index != state.elevator }
     .filter { it.value.isNotEmpty() }
     .filter { (index, _) ->
-        canMoveToFloor(state, component, index)
+        canMoveToFloor(state, listOf(component), index)
     }
     .map { (index, _) ->
         State(
@@ -133,8 +133,7 @@ private fun createSingleMoveStates(
 
 private fun canMoveToFloor(
     state: State,
-    component: Component,
-    other: Component,
+    components: List<Component>,
     floorIndex: Int,
 ): Boolean {
     val range = if (floorIndex < state.elevator) {
@@ -147,38 +146,17 @@ private fun canMoveToFloor(
         if (index == 0 && state.floors[0].isEmpty()) {
             false
         } else {
-            isFloorValid(state.floors[index] + component + other)
+            isFloorValid(state.floors[index] + components)
         }
     }
 }
 
-private fun canMoveToFloor(
-    state: State,
-    component: Component,
-    floorIndex: Int,
-): Boolean {
-    val range = if (floorIndex < state.elevator) {
-        floorIndex..<state.elevator
-    } else {
-        (state.elevator + 1)..floorIndex
-    }
-
-    return range.all {
-        if (it == 0 && state.floors[0].isEmpty()) {
-            false
-        } else {
-            isFloorValid(state.floors[it] + component)
-        }
-    }
-}
-
-private fun isFloorValid(floor: Collection<Component>): Boolean {
-    return when {
+private fun isFloorValid(floor: Collection<Component>): Boolean =
+    when {
         floor.size < 2 -> true
         floor.filterIsInstance<Microchip>().all { Generator(it.name) in floor } -> true
         else -> false
     }
-}
 
 private fun parseFloors(lines: List<String>): List<List<Component>> =
     lines.map { line ->
@@ -234,6 +212,7 @@ private class State(
 
     override fun toString(): String = "State(elevator=$elevator, floors=$floors, moves=$moves)"
 
-    fun distance(): Int =
-        floors.mapIndexed { index, floor -> (3 - index) * floor.size }.sum()
+    fun distance(): Int = floors
+        .mapIndexed { index, floor -> (3 - index) * floor.size }
+        .sum()
 }
