@@ -8,14 +8,7 @@ import common.day
 fun main() {
     day(n = 16) {
         part1 { input ->
-            val length = input.lines[1].toInt()
-
-            var data = input.lines[0]
-            while(data.length < length) {
-                data = dragonCurve(data)
-            }
-
-            checksum(data.take(length))
+            solve(initial = input.lines[0], length = input.lines[1].toInt())
         }
         verify {
             expect result "00000100100001100"
@@ -23,14 +16,7 @@ fun main() {
         }
 
         part2 { input ->
-            val length = 35651584
-
-            var data = input.lines[0]
-            while(data.length < length) {
-                data = dragonCurve(data)
-            }
-
-            checksum(data.take(length))
+            solve(initial = input.lines[0], length = 35651584)
         }
         verify {
             expect result "00011010100010010"
@@ -38,17 +24,20 @@ fun main() {
     }
 }
 
+private fun solve(initial: String, length: Int): String {
+    var data = initial
+    do data = dragonCurve(data) while (data.length < length)
+    
+    var sum = data.take(length)
+    do sum = checksum(sum) while (sum.length % 2 == 0)
+
+    return sum
+}
+
 private fun dragonCurve(a: String): String {
     val b = a.reversed().map { if (it == '1') '0' else '1' }.joinToString("")
     return a + '0' + b
 }
 
-private fun checksum(data: String): String {
-    var checksum = data
-    do {
-        checksum = checksum.chunked(2).joinToString("") {
-            if (it in setOf("00", "11")) "1" else "0"
-        }
-    } while (checksum.length % 2 == 0)
-    return checksum
-}
+private fun checksum(data: String): String =
+    data.chunked(2).joinToString("") { if (it in setOf("00", "11")) "1" else "0" }
