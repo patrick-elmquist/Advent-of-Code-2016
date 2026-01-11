@@ -13,7 +13,7 @@ fun main() {
 
             input.lines.drop(1)
                 .fold(initial.toList()) { password, operation ->
-                    performOperation(operation, password, inverse = false)
+                    password.performOperation(operation)
                 }
                 .joinToString("")
         }
@@ -28,7 +28,7 @@ fun main() {
             input.lines.drop(1)
                 .reversed()
                 .fold(initial.toList()) { password, operation ->
-                    performOperation(operation, password, inverse = true)
+                    password.performOperation(operation, inverse = true)
                 }
                 .joinToString("")
         }
@@ -38,32 +38,31 @@ fun main() {
     }
 }
 
-private fun performOperation(
+private fun List<Char>.performOperation(
     operation: String,
-    password: List<Char>,
     inverse: Boolean = false,
 ): List<Char> {
     val split = operation.split(" ")
     return when (split.first()) {
-        "swap" if split[1] == "position" -> password.swapPositions(split)
-        "swap" if split[1] == "letter" -> password.swapLetters(split)
+        "swap" if split[1] == "position" -> swapPositions(split)
+        "swap" if split[1] == "letter" -> swapLetters(split)
 
         "rotate" if split[1] == "based" -> if (inverse) {
-            password.rotateBasedOnInverse(split[6].first())
+            rotateBasedOnInverse(split[6].first())
         } else {
-            password.rotateBasedOn(split[6].first())
+            rotateBasedOn(split[6].first())
         }
 
         "rotate" if split[1] == "left" -> if (inverse) {
-            password.rotateRight(split[2].toInt())
+            rotateRight(split[2].toInt())
         } else {
-            password.rotateLeft(split[2].toInt())
+            rotateLeft(split[2].toInt())
         }
 
         "rotate" if split[1] == "right" -> if (inverse) {
-            password.rotateLeft(split[2].toInt())
+            rotateLeft(split[2].toInt())
         } else {
-            password.rotateRight(split[2].toInt())
+            rotateRight(split[2].toInt())
         }
 
         "move" -> {
@@ -72,7 +71,7 @@ private fun performOperation(
             } else {
                 split[2].toInt() to split[5].toInt()
             }
-            val pass = password.toMutableList()
+            val pass = this.toMutableList()
             val c = pass.removeAt(x)
             pass.add(y, c)
             pass.toList()
@@ -82,10 +81,10 @@ private fun performOperation(
             val x = split[2].toInt()
             val y = split[4].toInt()
 
-            val start = password.take(x)
-            val substring = password.subList(x, y + 1).reversed()
+            val start = take(x)
+            val substring = subList(x, y + 1).reversed()
             val list =
-                start + substring + password.takeLast(password.size - start.size - substring.size)
+                start + substring + takeLast(size - start.size - substring.size)
             list.toList()
         }
 
